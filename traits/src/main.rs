@@ -161,4 +161,56 @@ fn main() {
     // };
     // println!("{}", get_name(&names, 3).unwrap());
     // // the benefit of associated types is you dont have to define every type in functions like get_name and you can refer to associated types of the trait you are working with
+
+    // implementing function overloading with generic traits
+
+    struct Human {
+        position: Coordinate,
+    }
+
+    struct Coordinate {
+        x: f64,
+        y: f64,
+    }
+
+    trait CanMove<T> {
+        fn move_to(&mut self, dest: T);
+    }
+
+    impl std::fmt::Display for Coordinate {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "({},{})", &self.x, &self.y)
+        }
+    }
+
+    impl CanMove<Coordinate> for Human {
+        fn move_to(&mut self, dest: Coordinate) {
+            println!("Moving to {}", dest);
+            self.position = dest
+        }
+    }
+    impl CanMove<Vec<Coordinate>> for Human {
+        fn move_to(&mut self, dest: Vec<Coordinate>) {
+            for _coordinate in dest.into_iter() {
+                println!("Moving to {}", _coordinate);
+                self.position = _coordinate;
+            }
+        }
+    }
+
+    let mut amir = Human {
+        position: Coordinate { x: 2., y: 2. },
+    };
+
+    amir.move_to(Coordinate { x: 5., y: 5. });
+    println!("Amir is at: {}", &amir.position);
+
+    amir.move_to(vec![
+        Coordinate { x: 6., y: 7. },
+        Coordinate { x: 10., y: 13. },
+        Coordinate { x: 2., y: 6. },
+        Coordinate { x: 7., y: 20. },
+    ]);
+
+    println!("Amir is at: {}", &amir.position);
 }
