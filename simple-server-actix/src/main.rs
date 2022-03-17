@@ -1,11 +1,12 @@
 #![allow(unused)]
 use actix_web::body::BoxBody;
-use actix_web::guard;
+use actix_web::{guard, Error};
 use actix_web::{
     get, http::header::ContentType, post, web, App, HttpResponse, HttpServer, Responder,
 };
 use serde::*;
 use std::sync::Mutex;
+use futures::{future::ok, stream::once};
 struct AppState {
     counter: Mutex<i32>,
 }
@@ -47,6 +48,7 @@ async fn main() -> std::io::Result<()> {
                     .configure(scoped_config),
             )
             .service(another_another_service)
+            .service(stream)
     })
     .bind(("127.0.0.1", 5000))?
     .run()
@@ -90,4 +92,11 @@ async fn another_another_service() -> CustomResponse {
         data: "fuck you".to_string(),
         status: 403,
     }
+}
+
+
+#[get("/stream")]
+async fn stream () -> impl Responder {
+    let body = once(ok::<_, Error>(web::Bytes::from_static(b"Hello again")));
+    HttpResponse::Ok().content_type("application/json").streaming(body)
 }
