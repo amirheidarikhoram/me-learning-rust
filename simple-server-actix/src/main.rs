@@ -1,6 +1,10 @@
 #![allow(unused)]
+use actix_web::body::BoxBody;
 use actix_web::guard;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{
+    get, http::header::ContentType, post, web, App, HttpResponse, HttpServer, Responder,
+};
+use serde::*;
 use std::sync::Mutex;
 struct AppState {
     counter: Mutex<i32>,
@@ -42,6 +46,7 @@ async fn main() -> std::io::Result<()> {
                     .service(list_users)
                     .configure(scoped_config),
             )
+            .service(another_another_service)
     })
     .bind(("127.0.0.1", 5000))?
     .run()
@@ -60,4 +65,29 @@ fn first_level_config(config: &mut web::ServiceConfig) {
         web::resource("/another")
             .route(web::get().to(|| async { HttpResponse::Ok().body(" you got another body") })),
     );
+}
+
+#[derive(Serialize)]
+struct CustomResponse {
+    data: String,
+    status: i32,
+}
+
+impl Responder for CustomResponse {
+    type Body = BoxBody;
+    fn respond_to(self, req: &actix_web::HttpRequest) -> HttpResponse<Self::Body> {
+        let body = serde_json::to_string(&self).unwrap();
+
+        HttpResponse::Ok()
+            .content_type(ContentType::json())
+            .body(body)
+    }
+}
+
+#[get("/anan")]
+async fn another_another_service() -> CustomResponse {
+    CustomResponse {
+        data: "fuck you".to_string(),
+        status: 403,
+    }
 }
