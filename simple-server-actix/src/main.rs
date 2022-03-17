@@ -49,6 +49,8 @@ async fn main() -> std::io::Result<()> {
             )
             .service(another_another_service)
             .service(stream)
+            .service(register)
+            .service(get_post_by_id)
     })
     .bind(("127.0.0.1", 5000))?
     .run()
@@ -99,4 +101,25 @@ async fn another_another_service() -> CustomResponse {
 async fn stream () -> impl Responder {
     let body = once(ok::<_, Error>(web::Bytes::from_static(b"Hello again")));
     HttpResponse::Ok().content_type("application/json").streaming(body)
+}
+
+#[post("/register/{user_name}")]
+async fn register(path: web::Path<String>) -> impl Responder {
+    let username = path.into_inner();
+    
+    println!("{}", username);
+
+    format!("")
+}
+
+#[get("/post/{post_id}")]
+async fn get_post_by_id (path: web::Path<GetPost>) -> impl Responder {
+    let get_post = path.into_inner();
+
+    format!("{}", get_post.post_id)
+}
+
+#[derive(Deserialize)]
+struct GetPost {
+    post_id: String,
 }
