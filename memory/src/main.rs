@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+#[derive(Copy, Clone)]
 enum Project {
     ProjectA,
     ProjectB,
@@ -14,24 +15,28 @@ impl Display for Project {
     }
 }
 
-struct  Mission {
-    name: String,
+#[derive(Copy, Clone)]
+struct  Mission<'a> {
+    name: &'a str,
     project: Project,
 }
 
 fn main() {
-    let mut mission = Mission {
-        name: String::from("Mission 1"),
+    let mission_a = Mission {
+        name: "Mission 1",
         project: Project::ProjectA,
     };
 
-    let _name = &mut mission.name;
-    let _project = &mut mission.project;
+    let mission_b = Mission {
+        name: "Mission 2",
+        project: Project::ProjectB,
+    };
 
-    _name.push_str(" - Updated");
-    *_project = Project::ProjectB;
+    let mut missions = [mission_a, mission_b];
 
-    // print mission
-    println!("Mission: {}", mission.name);
-    println!("Project: {}", mission.project);
+    let m0 = &mut missions[0];
+
+    m0.name = "Mission 3";
+
+    println!("{}: {}", mission_a.project, mission_a.name);
 }
