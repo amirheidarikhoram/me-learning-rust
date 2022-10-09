@@ -2,18 +2,21 @@
 // This macro is created based on a crust of rust epsiode by jonhoo. 
 #[macro_export]
 macro_rules! avec {
-    () => {
-        Vec::new()
-    };
-    ($($x:expr),* $(,)?) => {
+    ($($x:expr),*) => {
         {
-            let mut temp_vec = Vec::with_capacity(count!($($x),*));
+            const LENGTH: usize = count!($($x),*);
+            #[allow(unused_mut)]
+            let mut temp_vec = Vec::with_capacity(LENGTH);
             $(
                 temp_vec.push($x);
             )*
             temp_vec
         }
     };
+    ($($x:expr,)*) => {{
+        avec! [$($x),*]
+    }};
+    
 }
 
 #[macro_export]
@@ -22,7 +25,7 @@ macro_rules! count {
         ()
     };
     ($($x: expr),*) => {
-        [$(count! (SUBST $x)),*].len()
+        <[()]>::len(&[$(count! (SUBST $x)),*])
     };
 }
 
