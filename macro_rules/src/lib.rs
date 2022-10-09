@@ -7,12 +7,22 @@ macro_rules! avec {
     };
     ($($x:expr),* $(,)?) => {
         {
-            let mut temp_vec = Vec::new();
+            let mut temp_vec = Vec::with_capacity(count!($($x),*));
             $(
                 temp_vec.push($x);
             )*
             temp_vec
         }
+    };
+}
+
+#[macro_export]
+macro_rules! count {
+    (SUBST $x: expr) => {
+        ()
+    };
+    ($($x: expr),*) => {
+        [$(count! (SUBST $x)),*].len()
     };
 }
 
